@@ -1,4 +1,3 @@
-import { SignClient } from "@walletconnect/sign-client";
 import "./App.css";
 import {
   EthereumClient,
@@ -6,17 +5,16 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 import { Web3Button, Web3Modal } from "@web3modal/react";
-import { configureChains, createConfig, WagmiConfig, useAccount } from "wagmi";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import type { Chain } from "wagmi";
 import React from "react";
-import { useEffect, useState } from "react";
 
 import mintableTokenAbi from "./mt-interface.json";
 import { ethers } from "ethers";
 
 declare global {
   interface Window {
-    ethereum: import("ethers").JsonRpcProvider;
+    ethereum: import("ethers").Eip1193Provider;
   }
 }
 
@@ -25,7 +23,7 @@ const testnetApiUrl = "https://testnet.hashio.io/api";
 const hederaTestnet = {
   id: 296,
   name: "Hedera Testnet",
-  network: "Hedera Testnet",
+  network: "testnet",
   nativeCurrency: {
     decimals: 18,
     name: "HBAR",
@@ -56,24 +54,27 @@ const ethereumClient = new EthereumClient(wagmiConfig, chains);
 const mintableTokenContractAddress =
   "0x0000000000000000000000000000000000edaabf";
 
+let provider: ethers.BrowserProvider;
+let signer: ethers.Signer;
+
+async function initProvider() {
+  provider = new ethers.BrowserProvider(window.ethereum);
+  signer = await provider.getSigner();
+}
+
 async function transferHbar() {
-  // const [account] = await window.ethereum.request({
-  //   method: "eth_requestAccounts",
-  // });
-  // console.log(account);
-  const account = ethereumClient;
-  console.log(account);
+  if (!provider) initProvider();
+
+  const response = await provider.send("eth_chainId", []);
 }
 
 async function transferMintableToken() {
-  // @ts-expect-error
+  if (!provider) initProvider();
   const [account] = await window.ethereum.request({
     method: "eth_requestAccounts",
   });
   console.log(account);
 
-  // @ts-expect-error
-  const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
 
   const mintableTokenContract = new ethers.Contract(
@@ -84,7 +85,6 @@ async function transferMintableToken() {
 
   const balance = await mintableTokenContract.balanceOf(account);
   console.log("balance", balance);
-  // @ts-expect-error
   await mintableTokenContract.transfer(
     "0x462f65AD30e0BB3B4104c91D2FFc3b85872bbfBf",
     "2000000000000000000",
@@ -92,8 +92,6 @@ async function transferMintableToken() {
 }
 
 function App() {
-  const [signClient, setSignClient] = useState();
-
   return (
     <div className="App">
       <>
