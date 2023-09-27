@@ -36,3 +36,23 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* Estilos para los botones en el componente App */
+.App button {
+  margin-bottom: 10px; /* Agrega espacio entre los botones */
+  background-color: #3B99FC; /* Cambia el color de fondo de los botones */
+  color: white; /* Cambia el color del texto de los botones */
+  padding: 10px 20px; /* Agrega espaciado interno a los botones */
+  font-size: 16px; /* Cambia el tamaño de fuente de los botones */
+  border: none; /* Elimina el borde de los botones */
+  border-radius: 10px; /* Agrega bordes redondeados */
+  cursor: pointer; /* Cambia el cursor al pasar sobre los botones */
+}
+
+/* Estilos adicionales para resaltar el botón al pasar el mouse */
+.App button:hover {
+  background-color: #4ca3dd; /* Cambia el color de fondo al pasar el mouse */
+  border-radius: 10px; /* Agrega bordes redondeados */
+}
+
