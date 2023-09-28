@@ -67,7 +67,7 @@ let provider: ethers.BrowserProvider;
 let signer: ethers.Signer;
 
 // Function used to initialize the provider and signer variables
-async function initProvider() {
+async function initProviderAndSigner() {
   provider = new ethers.BrowserProvider(window.ethereum);
   signer = await provider.getSigner();
 }
@@ -82,23 +82,20 @@ async function createToken() {
 // Function used to associate a new account with the token using the smart contract
 async function associateAccountWithToken() {
 
-  if (!provider) initProvider();
-
-  // Get the signer
-  signer = await provider.getSigner();
+  if (!provider || !signer) initProviderAndSigner();
 
   try {
     // Get the solidity address from the token id
     const mintableTokenContractAddress = '0x' + tokenId!.toSolidityAddress();
 
-    // Create the contract instance to interact with the smart contract
+    // Create the contract instance to interact with the token
     const mintableTokenContract = new ethers.Contract(
       mintableTokenContractAddress,
       mintableTokenAbi,
       signer,
     );
 
-    // Associate the new account with the token using the smart contract
+    // Associate the new token with the current Metamask account using the contract instance
     const transactionResult = await mintableTokenContract.associate();
     const txAssociate = await transactionResult.wait();
     const transferStatus = txAssociate.status === 1 ? "SUCCESS" : "FAIL";
@@ -115,10 +112,7 @@ async function associateAccountWithToken() {
 // Function used to transfer a fungible token using the smart contract
 async function transferMintableToken(recipientAddress: string) {
 
-  if (!provider) initProvider();
-
-  // Get the signer
-  signer = await provider.getSigner();
+  if (!provider || !signer) initProviderAndSigner();
 
   try {
 
@@ -170,7 +164,7 @@ function App() {
         </div>
         <div>
           <button onClick={associateAccountWithToken}>
-            Associate Recipient Account with Token
+            Associate new token with recipient account
           </button>
         </div>
         <div>
