@@ -56,3 +56,11 @@
   border-radius: 10px; /* Agrega bordes redondeados */
 }
 
+/* Estilos CSS para el cuadro de texto */
+.text-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  width: 25%;
+}

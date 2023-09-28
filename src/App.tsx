@@ -7,9 +7,10 @@ import {
 import { Web3Button, Web3Modal } from "@web3modal/react";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import type { Chain } from "wagmi";
-import { createFungibleToken, tokenAssociate, createAccount } from "./utils";
+import { createFungibleToken} from "./utils";
 import mintableTokenAbi from "./mt-interface.json";
 import { ethers } from "ethers";
+import { useState } from "react";
 
 declare global {
   interface Window {
@@ -78,15 +79,10 @@ async function createToken() {
   alert("Token created successfully with id: " + tokenId);
 }
 
-// Function used to transfer a fungible token using the smart contract
-async function transferMintableToken() {
+// Function used to associate a new account with the token using the smart contract
+async function associateAccountWithToken() {
 
   if (!provider) initProvider();
-
-  // Request account access if needed
-  const [account] = await window.ethereum.request({
-    method: "eth_requestAccounts",
-  });
 
   // Get the signer
   signer = await provider.getSigner();
@@ -102,29 +98,53 @@ async function transferMintableToken() {
       signer,
     );
 
-    // Get the balance of the account
-    let balance = await mintableTokenContract.balanceOf(account);
-    console.log("Balance of the metamask account: ", balance.toString());
+    // Associate the new account with the token using the smart contract
+    const transactionResult = await mintableTokenContract.associate();
+    const txAssociate = await transactionResult.wait();
+    const transferStatus = txAssociate.status === 1 ? "SUCCESS" : "FAIL";
+    alert("Associate transaction finish with status: " + transferStatus);
+    console.log("The associate transaction finish with status: ", txAssociate.status.toString());
 
-    // Create a new account and associate it to the token so that it can receive tokens
-    const { accountId, privateKey } = await createAccount();
+  }
+  catch (error) {
+    console.log("The associate transaction finish with error: ", error);
+    alert("The associate function fail, make sure you have changed the account in metamask and that you have created a token");
+  }
+}
 
-    // Associate function from the SDK
-    await tokenAssociate(accountId!, privateKey, tokenId!);
+// Function used to transfer a fungible token using the smart contract
+async function transferMintableToken(recipientAddress: string) {
 
-    // Get the solidity address from the new account id
-    const newAccountAddress = '0x' + accountId!.toSolidityAddress();
+  if (!provider) initProvider();
+
+  // Get the signer
+  signer = await provider.getSigner();
+
+  try {
+
+    // Get the solidity address from the token id
+    const mintableTokenContractAddress = '0x' + tokenId!.toSolidityAddress();
+
+    // Create the contract instance to interact with the smart contract
+    const mintableTokenContract = new ethers.Contract(
+      mintableTokenContractAddress,
+      mintableTokenAbi,
+      signer,
+    );
+
+    let balance = await mintableTokenContract.balanceOf(signer);
+    console.log("The balance of the metamask account before the transfer is: ", balance.toString());
 
     // Transfer 2 tokens to the new account
-    const transfer = await mintableTokenContract.transfer( newAccountAddress, "2", { gasLimit: 1000000 });
+    const transfer = await mintableTokenContract.transfer(recipientAddress, "2", { gasLimit: 1000000 });
     const txTransfer = await transfer.wait();
     const transferStatus = txTransfer.status === 1 ? "SUCCESS" : "FAIL";
     alert("Transfer transaction finish with status: " + transferStatus);
     console.log("The transfer transaction finish with status: ", txTransfer.status.toString());
 
     // Check the balance of the account after the transfer
-    balance = await mintableTokenContract.balanceOf(account);
-    console.log("The balance of the metamask account is: ", balance.toString());
+    balance = await mintableTokenContract.balanceOf(signer);
+    console.log("The balance of the metamask account after the transfer is: ", balance.toString());
   }
   catch (error) {
     console.log("The transfer transaction finish with error: ", error);
@@ -133,6 +153,8 @@ async function transferMintableToken() {
 }
 
 function App() {
+  const [recipientAddress, setrecipientAddress] = useState("");
+
   return (
     <div className="App">
       <>
@@ -147,8 +169,21 @@ function App() {
           </button>
         </div>
         <div>
-          <button onClick={transferMintableToken}>
-            Transfer 2 Tokens to a New Second Account
+          <button onClick={associateAccountWithToken}>
+            Associate Recipient Account with Token
+          </button>
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="Enter Recipient EVM Address"
+            value={recipientAddress}
+            onChange={(e) => setrecipientAddress(e.target.value)}
+            className="text-input" // Aplicar la clase CSS al elemento
+          />
+          &nbsp;&nbsp;
+          <button onClick={() => transferMintableToken(recipientAddress)}>
+            Transfer 2 Tokens to Recipient Account
           </button>
         </div>
         <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
