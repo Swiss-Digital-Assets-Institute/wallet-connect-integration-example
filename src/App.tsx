@@ -82,7 +82,7 @@ async function createToken() {
 // Function used to associate a new account with the token using the smart contract
 async function associateAccountWithToken() {
 
-  if (!provider || !signer) initProviderAndSigner();
+  await initProviderAndSigner();
 
   try {
     // Get the solidity address from the token id
@@ -98,8 +98,8 @@ async function associateAccountWithToken() {
     // Associate the new token with the current Metamask account using the contract instance
     const transactionResult = await mintableTokenContract.associate();
     const txAssociate = await transactionResult.wait();
-    const transferStatus = txAssociate.status === 1 ? "SUCCESS" : "FAIL";
-    alert("Associate transaction finish with status: " + transferStatus);
+    const associateStatus = txAssociate.status === 1 ? "SUCCESS" : "FAIL";
+    alert("Associate transaction finish with status: " + associateStatus);
     console.log("The associate transaction finish with status: ", txAssociate.status.toString());
 
   }
@@ -109,10 +109,40 @@ async function associateAccountWithToken() {
   }
 }
 
+// Function used to associate a new account with the token using the smart contract
+async function dissociateAccountWithToken() {
+
+  await initProviderAndSigner();
+
+  try {
+    // Get the solidity address from the token id
+    const mintableTokenContractAddress = '0x' + tokenId!.toSolidityAddress();
+
+    // Create the contract instance to interact with the token
+    const mintableTokenContract = new ethers.Contract(
+      mintableTokenContractAddress,
+      mintableTokenAbi,
+      signer,
+    );
+
+    // Associate the new token with the current Metamask account using the contract instance
+    const transactionResult = await mintableTokenContract.dissociate();
+    const txDissociate = await transactionResult.wait();
+    const dissociateStatus = txDissociate.status === 1 ? "SUCCESS" : "FAIL";
+    alert("Dissociate transaction finish with status: " + dissociateStatus);
+    console.log("The Dissociate transaction finish with status: ", txDissociate.status.toString());
+
+  }
+  catch (error) {
+    console.log("The Dissociate transaction finish with error: ", error);
+    alert("The Dissociate function fail, make sure you have changed the account in metamask and that you have created a token");
+  }
+}
+
 // Function used to transfer a fungible token using the smart contract
 async function transferMintableToken(recipientAddress: string) {
 
-  if (!provider || !signer) initProviderAndSigner();
+  await initProviderAndSigner();
 
   try {
 
@@ -178,6 +208,11 @@ function App() {
           &nbsp;&nbsp;
           <button onClick={() => transferMintableToken(recipientAddress)}>
             Transfer 2 Tokens to Recipient Account
+          </button>
+        </div>
+        <div>
+          <button onClick={dissociateAccountWithToken}>
+            Dissociate new token with recipient account
           </button>
         </div>
         <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
