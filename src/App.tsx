@@ -11,6 +11,7 @@ import { createFungibleToken } from "./utils";
 import mintableTokenAbi from "./mt-interface.json";
 import { ethers } from "ethers";
 import { useState } from "react";
+import { TokenId } from "@hashgraph/sdk";
 
 declare global {
   interface Window {
@@ -85,10 +86,10 @@ function isValidEthereumAddress(address: string) {
 }
 
 // Function used to create a fungible token using the SDK
-async function createToken() {
+async function createToken(onTokenCreated: (tokenId: TokenId) => void) {
   console.log("creating token...")
   tokenId = await createFungibleToken("Mintable Token", "MT");
-  alert("Token created successfully with id: " + tokenId);
+  onTokenCreated(tokenId!)
 }
 
 // Function used to associate a new account with the token using the smart contract
@@ -193,8 +194,8 @@ async function transferMintableToken(recipientAddress: string, amount: string) {
   }
 }
 
-async function transferHbarToken(address : string, amount : string) {
-  
+async function transferHbarToken(address: string, amount: string) {
+
   await initProviderAndSigner();
 
   const isValidAddress = isValidEthereumAddress(address);
@@ -254,7 +255,7 @@ async function transferFrom(fromAddress: string, toAddress: string, amount: stri
   const isToAddressValidAddress = isValidEthereumAddress(fromAddress);
   if (!isFromAddressValidAddress || !isToAddressValidAddress) return;
 
-  try{
+  try {
 
     // Get the solidity address from the token id
     const mintableTokenContractAddress = '0x' + tokenId!.toSolidityAddress();
@@ -302,7 +303,15 @@ function App() {
   const [regularTransferAmount, setRegularTransferAmount] = useState("");
   const [hbarTransferAddress, setHbarTransferAddress] = useState("");
   const [hbarTransferAmount, setHbarTransferAmount] = useState("");
+  const [tokenCreated, setTokenCreated] = useState(false);
+  const [createdTokenId, setCreatedTokenId] = useState("");
 
+
+  const handleTokenCreated = (tokenId: TokenId) => {
+    setTokenCreated(true);
+    setCreatedTokenId(tokenId.toString());
+    alert("Token created successfully with id: " + tokenId);
+  };
 
   return (
     <div className="app">
@@ -397,7 +406,10 @@ function App() {
           {/* TokenOperations Component */}
           <div className="token-operations">
             <h2>Token Operations</h2>
-            <button onClick={createToken}>Create fungible token</button>
+            <button onClick={() => createToken(handleTokenCreated)} style={{ backgroundColor: tokenCreated ? '#399858' : '#007bff' }}
+            >
+              {tokenCreated ? `Token ID: ${createdTokenId}` : 'Create fungible token'}
+            </button>
             <button onClick={associateAccountWithToken}>Associate</button>
             <button onClick={dissociateAccountWithToken}>Dissociate</button>
           </div>
