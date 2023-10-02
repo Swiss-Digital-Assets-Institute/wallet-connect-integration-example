@@ -27,7 +27,7 @@ export async function createFungibleToken(tokenName: string, tokenSymbol: string
 		.setTokenName(tokenName)
 		.setTokenSymbol(tokenSymbol)
 		.setTokenType(TokenType.FungibleCommon)
-		.setDecimals(2)
+		.setDecimals(0)
 		.setInitialSupply(1000)
 		.setTreasuryAccountId(myAccountId)
 		.setSupplyKey(myPrivateKey.publicKey)
