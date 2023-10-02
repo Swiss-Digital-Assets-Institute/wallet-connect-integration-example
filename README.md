@@ -201,11 +201,17 @@ Follow these steps to run your project:
 4. Open your web browser and go to **[http://localhost:3000](http://localhost:3000/)**. You will be able to view and interact with your project.
     
     You will se something like this:
+     <img width="1487" alt="Screenshot 2023-10-02 at 16 54 02" src="https://github.com/Swiss-Digital-Assets-Institute/wallet-connect-integration-example/assets/91057170/7fbfb1ac-b679-4d03-bfd9-133f3dc599f9">
+
     
     
-5. Additionally, you can open the browser's console (right-clicking and selecting "Inspect" and then navigating to the "Console" tab) to access more detailed information and potential error messages.
+6. Additionally, you can open the browser's console (right-clicking and selecting "Inspect" and then navigating to the "Console" tab) to access more detailed information and potential error messages.
 
 **Video Demo**: If you'd like to see a demonstration of how to use this DApp, we've prepared a video tutorial for you. This video will guide you through the usage of the DApp, including creating tokens, transferring them, and more.
+
+
+https://github.com/Swiss-Digital-Assets-Institute/wallet-connect-integration-example/assets/91057170/f4cfc479-1fb2-4a36-bbf1-62c58345b8de
+
 
 
 
